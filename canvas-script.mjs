@@ -3,18 +3,23 @@ import { santa, Wolf, bullet, raindeer, rockets } from './characters.js';
 import { gameData } from './gameplay.js';
 
 window.onload = function () {
-  let mainMenuOn = true;
+  console.log(localStorage.getItem('pobjeda'));
+  let mainMenuOn = !JSON.parse(localStorage.getItem('pobjeda')); //ovo vratiti u true
   let gameOn = false;
   let storyOn = false;
+  let finalStory = JSON.parse(localStorage.getItem('pobjeda')); // ovo vratiti u false
   let pobjeda = false;
+  let gubitak = false;
   let level = 1;
   let maxLevelNumber = localStorage.getItem('levelFinished');
+  console.log(maxLevelNumber);
   if (maxLevelNumber == null) maxLevelNumber = 1;
 
   //Images loading
   const {
     planine,
     tile,
+    lastImage,
     snowFields,
     santaImages,
     smokeImages,
@@ -26,12 +31,16 @@ window.onload = function () {
     sledImages,
     rocketFlyImages,
     rocketSteadyImages,
+    santaFightImages,
+    explosionImages,
   } = imagesDefinition();
   let stopAnimationLoop = false;
 
   freeBlitzen(); // Main game function
   function freeBlitzen() {
     //definitions
+    console.log('37 37 37 ');
+    console.log(level);
     var canvas = document.getElementById('Pattern');
     var context = canvas.getContext('2d');
     context.save();
@@ -41,6 +50,7 @@ window.onload = function () {
       const gunnerSanta = new Image();
       gunnerSanta.src = 'SantaGunner.png';
       let startTextColor = 'red';
+      //Drawing of the gunner santa in the main menu
       gunnerSanta.onload = function () {
         context.drawImage(
           gunnerSanta,
@@ -142,7 +152,7 @@ window.onload = function () {
         );
       }
       function drawInstructions() {
-        const text = 'INSTRUCTIONS';
+        const text = '(r,f,e)-fire, -> move right, e-fire rocket';
         const cursiveFont = "'Cursive Font', cursive";
         context.textAlign = 'center';
         context.font = `normal 700 48px ${cursiveFont}`;
@@ -157,7 +167,7 @@ window.onload = function () {
         context.strokeText(text, canvas.width / 2, (canvas.height * 2) / 6);
       }
       function drawStartText() {
-        const text = 'START';
+        const text = '';
         const cursiveFont = "'Cursive Font', cursive";
         context.textAlign = 'center';
         context.font = `normal 700 60px ${cursiveFont}`;
@@ -240,17 +250,18 @@ window.onload = function () {
 
             freeBlitzen(); //Restarting function
           }
-          gameData.levels.forEach((level) => {
+          gameData.levels.forEach((levelItem) => {
             if (
-              mouseX > level.levelButtonX - 150 &&
-              mouseX < level.levelButtonX + 150 &&
-              mouseY > level.levelButtonY - 50 &&
-              mouseY < level.levelButtonY + 50
+              mouseX > levelItem.levelButtonX - 150 &&
+              mouseX < levelItem.levelButtonX + 150 &&
+              mouseY > levelItem.levelButtonY - 50 &&
+              mouseY < levelItem.levelButtonY + 50
             ) {
               gameOn = true;
               mainMenuOn = false;
-              level = level.levelId;
-
+              level = levelItem.levelId;
+              console.log('256 256 256 256');
+              console.log(level);
               freeBlitzen();
             }
           });
@@ -259,6 +270,7 @@ window.onload = function () {
     }
     let wolfs = [];
     if (gameOn) {
+      //drawing of mountains
       planine.onload = function () {
         context.drawImage(
           planine,
@@ -276,7 +288,7 @@ window.onload = function () {
     if (gameOn) game();
     function game() {
       let numberOfFiredRockets = 0;
-      const radian = Math.PI / 180;
+      const radian = Math.PI / 180; //služi za zakretanje rakete
       let leftArrowKeyPressed = false;
       let rKeyPressed = false;
       let oneOfRocketsIsFlying = false;
@@ -285,6 +297,7 @@ window.onload = function () {
       //crtanje sante
       function drawSanta(number) {
         //console.log(number);
+        if (gubitak) return;
         context.drawImage(
           santaImages[number],
           0,
@@ -388,10 +401,46 @@ window.onload = function () {
           cellHeight * 2
         );
       }
+
+      //crtanje eksplozije
+      function drawExplosion(number, wolfx, wolfy) {
+        const scaleFactor = 8; // Change this value to scale the image (0.5 = 50% smaller, 0.25 = 25% smaller)
+        console.log(number);
+        context.drawImage(
+          explosionImages[number],
+          0, // Source X (Keep 0 to take the whole image)
+          0, // Source Y
+          1020, // Full Source width
+          1022, // Full Source height
+          wolfx,
+          wolfy,
+          346 * scaleFactor, // Scaled destination width
+          328 * scaleFactor // Scaled destination height
+        );
+      }
+
+      //crtanje tučnjave
+      function drawFight(number) {
+        const scaleFactor = 1.5; // Change this value to scale the image (0.5 = 50% smaller, 0.25 = 25% smaller)
+
+        context.drawImage(
+          santaFightImages[number],
+          0, // Source X (Keep 0 to take the whole image)
+          0, // Source Y
+          1020, // Full Source width
+          1022, // Full Source height
+          canvas.width / 80,
+          (canvas.height * 5) / 10,
+          346 * scaleFactor, // Scaled destination width
+          328 * scaleFactor // Scaled destination height
+        );
+      }
+
       //crtanje vuka
       function drawWolf(number, x, y) {
         //console.log(number);
         //console.log(x);
+
         context.drawImage(
           wolfImages[number],
           0,
@@ -493,8 +542,11 @@ window.onload = function () {
       window.requestAnimationFrame(animationLoop);
       let totalWolfNumber = 0;
       let killedWolfNumber = 0;
+      let numberOfFlyWolfes = 0;
       let fireworkCounter = 0;
       let fireworkCounter2 = 0;
+      let fightCounter = 0;
+      let fightCounter2 = 0;
       let santaCounter = 0;
       let gunsmokeCounter = 0;
       let start = new Date();
@@ -541,7 +593,7 @@ window.onload = function () {
           );
 
           //crtanje vatrometa
-
+          console.log(level);
           if (pobjeda) {
             fireworkCounter2 = fireworkCounter % 33;
             fireworkCounter = fireworkCounter + 1;
@@ -552,7 +604,21 @@ window.onload = function () {
               if (level + 1 > maxLevelNumber) {
                 localStorage.setItem('levelFinished', `${level + 1}`);
               }
-              location.reload();
+
+              if (level === 9) {
+                console.log('zadnja pobjeda');
+                gameOn = false;
+                finalStory = true;
+                localStorage.setItem('pobjeda', true);
+                setTimeout(() => {
+                  location.reload();
+                }, 0);
+              }
+              if (level < 9) {
+                setTimeout(() => {
+                  location.reload();
+                }, 0); //set timeout služi ovdje da se forsa reload
+              }
             }
           }
 
@@ -599,7 +665,6 @@ window.onload = function () {
           santaCounter = santaCounter + santa.santaspeed;
 
           //Kreiraj vukove
-          //console.log(snowfieldx);
           //gameData.levels[0].maxWolfNumber ovo je broj valova vukova
           if (totalWolfNumber < gameData.levels[level - 1].maxWolfNumber + 5) {
             if (
@@ -615,13 +680,18 @@ window.onload = function () {
               }
               totalWolfNumber = totalWolfNumber + startWolfNumber;
             }
-
+            //Ako se dođe na određenu poziciju krene dolaziti vuk iz padobrana
+            //I ako je broj letećih vukova do sada manji od 3
             if (
               (Math.floor(snowfieldx) % 1000 == 0 ||
                 Math.floor(snowfieldx - 1) % 1000 == 0) &&
-              snowfieldx > 0
+              snowfieldx > 0 &&
+              numberOfFlyWolfes < 3
             ) {
               const wolf = new Wolf(true);
+              numberOfFlyWolfes++;
+              //provjeri dali je vuk leteći
+
               totalWolfNumber++;
               wolfs.push(wolf);
             }
@@ -655,13 +725,30 @@ window.onload = function () {
                   wolf.wolfHeartXStart = wolf.wolfx - 100;
                   wolf.wolfHeartXEnd = wolf.wolfx + 100;
                   //wolf.wolfy = wolf.wolfy + (santa.santay - wolf.wolfy) / 10;
-                  drawFlyingWolf(wolf.wolfx, wolf.wolfy);
+                  if (wolf.wolfIsFrozen == true) {
+                    return;
+                  } else {
+                    drawFlyingWolf(wolf.wolfx, wolf.wolfy);
+                  }
                 }
               }
               if (wolf.wolfIsFrozen == true) {
                 wolf.wolfx =
                   wolf.wolfx - 2 * leftArrowKeyPressed * santa.santaspeed;
 
+                if (wolf.wolfx < santa.santax) return;
+                if (wolf.isWolfFlying) {
+                  //ako je vuk smrznut onda nećemo slikati
+                  //Ovjde privremeno ubaciti fight
+                  console.log(wolf.wolfExspolosionCounter);
+                  let ExspolosionCounter = wolf.wolfExspolosionCounter % 25;
+                  wolf.wolfExspolosionCounter = wolf.wolfExspolosionCounter + 1;
+                  console.log(wolf.wolfExspolosionCounter);
+
+                  if (wolf.wolfExspolosionCounter > 25) return;
+                  drawExplosion(ExspolosionCounter, wolf.wolfx, wolf.wolfy);
+                  return;
+                } //Ovjde privremeno ubaciti fight
                 drawWolf(wolf.frozenPicNO, wolf.wolfx, wolf.wolfy);
               }
             });
@@ -673,6 +760,19 @@ window.onload = function () {
             drawSanta(1);
           }
           drawSled(0);
+          //crtanje tučnjave ako je
+          if (gubitak) {
+            fightCounter2 = fightCounter % 26;
+            fightCounter = fightCounter + 1;
+            console.log(fightCounter);
+            drawFight(fightCounter2); //Drawing firework
+            if (fightCounter > 50) {
+              console.log(fightCounter);
+              setTimeout(() => {
+                location.reload();
+              }, 0); //set timeout služi ovdje da se forsa reload
+            }
+          }
 
           oneOfRocketsIsFlying = rockets.filter(
             (rocket) => rocket.rocketIsFlying == true
@@ -729,21 +829,22 @@ window.onload = function () {
             //Check if wolf is hit ako vuk leti i ako raketa leti
 
             if (wolf.isWolfFlying && oneOfRocketsIsFlying.length > 0) {
-              //console.log(rockets[oneOfRocketsIsFlying[0].rocketId]);
-              // console.log(wolf);
-              wolf.isFalling = wolf.isDowned(
+              wolf.isExploading = wolf.isDowned(
                 rockets[oneOfRocketsIsFlying[0].rocketId]
               );
-              if (wolf.isFalling) console.log('Pogodaaak');
+              if (wolf.isExploading) {
+                wolf.wolfIsFrozen = true;
+              }
             }
           });
           //provjera jesu li svi vukovi smrznuti
           if (wolfs.filter((wolf) => wolf.isFrozen == false).length <= 0)
             allWolfSFrozen = true;
           //ako su svi vukovi smrznuti i broj valova vukaova tog levela je maksimum onda napiši pobjeda
+
           if (
             allWolfSFrozen &&
-            totalWolfNumber >= gameData.levels[level].maxWolfNumber
+            totalWolfNumber >= gameData.levels[level - 1].maxWolfNumber
           ) {
             //
             //Samo za probu treba kasnije izbrisati
@@ -778,13 +879,19 @@ window.onload = function () {
         // animate
         wolfs.forEach((wolf) => {
           if (wolf.isWolfFlying) {
-            if (wolf.wolfy > santa.santay) santa.santaIsDead = true;
+            if (wolf.wolfy > santa.santay - 200 && !wolf.wolfIsFrozen) {
+              santa.santaIsDead = true;
+              wolf.wolfIsFrozen = true;
+            }
           }
           if (!wolf.isWolfFlying) {
-            if (wolf.wolfx < santa.santax) santa.santaIsDead = true;
+            if (wolf.wolfx < santa.santax && !wolf.wolfIsFrozen) {
+              santa.santaIsDead = true;
+              wolf.wolfIsFrozen = true;
+            }
           }
           if (santa.santaIsDead) {
-            console.log('santa je mrtav');
+            gubitak = true;
           }
         });
         if (!stopAnimationLoop) {
@@ -826,6 +933,7 @@ window.onload = function () {
           // Your code to handle the right arrow key press goes here
 
           leftArrowKeyPressed = true;
+          if (pobjeda) leftArrowKeyPressed = false; //ako smo pobjedili ne možemo ići više naprijed
         }
       });
       document.addEventListener('keydown', function (event) {
@@ -859,6 +967,7 @@ window.onload = function () {
         }
       });
     }
+    //FIRST STORY FIRST STORY FIRST STORY BEGIN
     let storyTaleCounter = 0; //Counter for story scenes
     if (storyOn) story();
     function story() {
@@ -867,10 +976,7 @@ window.onload = function () {
       console.log(storyTalePictures);
       function drawStory() {
         //Draw Picture
-        console.log('----------------------------------');
-        console.log('story tale counter je' + storyTaleCounter);
-        console.log('----------------------------------');
-        console.log(storyTalePictures[storyTaleCounter]);
+
         storyTalePictures[storyTaleCounter].onload = function () {
           context.drawImage(
             storyTalePictures[storyTaleCounter],
@@ -915,7 +1021,6 @@ window.onload = function () {
     }
     document.addEventListener('keypress', function (event) {
       if (storyOn) {
-        console.log('nešto je stisnuto ');
         storyTaleCounter++;
         if (storyTaleCounter == 5) {
           mainMenuOn = true;
@@ -923,9 +1028,51 @@ window.onload = function () {
           location.reload();
         }
       }
-      console.log(storyTaleCounter);
+
       // Check if the key pressed is the one you expect (e.g., the spacebar)
       if (storyOn) story();
     });
+    //FIRST STORY FIRST STORY FIRST STORY END
+    //FINAL STORY BEGIN
+    if (finalStory) finalStoryFunction();
+    function finalStoryFunction() {
+      //Upload pictures
+      console.log(lastImage);
+
+      function drawLastStory() {
+        //Draw Picture
+
+        lastImage.onload = function () {
+          context.drawImage(
+            lastImage,
+            0,
+            0,
+            1792,
+            1024,
+            0,
+            0,
+            canvas.width,
+            canvas.height
+          );
+        };
+
+        //Draw text
+      }
+
+      drawLastStory();
+    }
+    document.addEventListener('keypress', function (event) {
+      if (finalStory) {
+        localStorage.setItem('pobjeda', false);
+        location.reload();
+      }
+    });
+    document.addEventListener('click', function () {
+      if (finalStory) {
+        localStorage.setItem('pobjeda', false);
+        location.reload();
+      }
+    });
+    //FINAL STORY END
   }
 };

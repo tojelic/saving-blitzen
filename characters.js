@@ -53,6 +53,7 @@ export class Wolf {
     if (isWolfFlying) this.wolfy = -100;
     if (isWolfFlying) this.isFalling = false;
     if (isWolfFlying) this.isDown = false;
+    if (isWolfFlying) this.wolfExspolosionCounter = 0;
     this.wolfHitSanta = false;
     if (!isWolfFlying) {
       this.wolfHeartXStart = this.wolfx + 50;

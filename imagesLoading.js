@@ -7,7 +7,7 @@ export function imagesDefinition() {
   //polja
   const snowFields = new Image();
   snowFields.src = 'snowFields.png';
-  //santa images
+  //santa images upload to array
   const santaImages = [];
   for (let i = 0; i < 13; i++) {
     const santaImage = new Image();
@@ -30,6 +30,31 @@ export function imagesDefinition() {
 
     rocketFlyImage.src = 'Rocket/RocketFly' + i + '.png';
     rocketFlyImages.push(rocketFlyImage);
+  }
+  //santa fight images
+  const santaFightImages = [];
+  for (let i = 1; i < 27; i++) {
+    const santaFightImage = new Image();
+    if (i < 10) {
+      santaFightImage.src = 'fight/fight0' + i + '.png';
+    } else {
+      santaFightImage.src = 'fight/fight' + i + '.png';
+    }
+
+    santaFightImages.push(santaFightImage);
+    console.log(santaFightImage);
+  }
+  //explosion images
+  const explosionImages = [];
+  for (let i = 1; i <= 25; i++) {
+    const explosionImage = new Image();
+    if (i < 10) {
+      explosionImage.src = 'explosion/exsplosion0' + i + '.png';
+    } else {
+      explosionImage.src = 'explosion/exsplosion' + i + '.png';
+    }
+
+    explosionImages.push(explosionImage);
   }
   //rocketFlyImages
   const rocketSteadyImages = [];
@@ -86,14 +111,18 @@ export function imagesDefinition() {
     fireworkImages.push(fireworkImage);
   }
 
+  const lastImage = new Image();
+  lastImage.src = './lastPicture/lastpicture.png';
+  console.log(lastImage);
   //story tale pictures
-
+  console.log(explosionImages);
   const images = {
     planine: planine,
     tile: tile,
     snowFields: snowFields,
     santaImages: santaImages,
     smokeImages: smokeImages,
+    lastImage: lastImage,
     backgroundItemsImages: backgroundItemsImages,
     wolfImages: wolfImages,
     flyingWolfImage: flyingWolfImage,
@@ -102,6 +131,8 @@ export function imagesDefinition() {
     sledImages: sledImages,
     rocketFlyImages: rocketFlyImages,
     rocketSteadyImages: rocketSteadyImages,
+    santaFightImages: santaFightImages,
+    explosionImages: explosionImages,
   };
 
   return images;
