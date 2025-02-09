@@ -152,7 +152,7 @@ window.onload = function () {
         );
       }
       function drawInstructions() {
-        const text = '(r,f,e)-fire, -> move right, e-fire rocket';
+        const text = '(r,f,c)-fire, -> move right, e-fire rocket';
         const cursiveFont = "'Cursive Font', cursive";
         context.textAlign = 'center';
         context.font = `normal 700 48px ${cursiveFont}`;
