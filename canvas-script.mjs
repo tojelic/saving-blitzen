@@ -611,12 +611,14 @@ window.onload = function () {
                 finalStory = true;
                 localStorage.setItem('pobjeda', true);
                 setTimeout(() => {
-                  location.reload();
+                  window.location.replace(window.location.href);
+                  //location.reload();
                 }, 0);
               }
               if (level < 9) {
                 setTimeout(() => {
-                  location.reload();
+                  window.location.replace(window.location.href);
+                  //location.reload();
                 }, 0); //set timeout služi ovdje da se forsa reload
               }
             }
@@ -769,7 +771,8 @@ window.onload = function () {
             if (fightCounter > 50) {
               console.log(fightCounter);
               setTimeout(() => {
-                location.reload();
+                window.location.replace(window.location.href);
+                //location.reload();
               }, 0); //set timeout služi ovdje da se forsa reload
             }
           }
@@ -1025,7 +1028,8 @@ window.onload = function () {
         if (storyTaleCounter == 5) {
           mainMenuOn = true;
           storyOn = false;
-          location.reload();
+          window.location.replace(window.location.href);
+          //location.reload();
         }
       }
 
@@ -1064,13 +1068,15 @@ window.onload = function () {
     document.addEventListener('keypress', function (event) {
       if (finalStory) {
         localStorage.setItem('pobjeda', false);
-        location.reload();
+        window.location.replace(window.location.href);
+        //location.reload();
       }
     });
     document.addEventListener('click', function () {
       if (finalStory) {
         localStorage.setItem('pobjeda', false);
-        location.reload();
+        window.location.replace(window.location.href);
+        //location.reload();
       }
     });
     //FINAL STORY END
